@@ -141,6 +141,7 @@ https://www.whitebyte.info/programming/css/how-to-make-a-div-take-the-remaining-
       $('head').append($("<style> .marker-color-" + (i + 1).toString() + " { color: " + colors[i] + "; font-size: 15px; text-shadow: 0 0 3px #ffffff;} </style>"));
     }
 
+<<<<<<< HEAD
     // Get GeoJSON and put on it on the map when it loads
     cellTowers = L.geoJson.ajax("assets/2020Wildfire.geojson", {
       // assign a function to the onEachFeature parameter of the cellTowers object.
@@ -191,6 +192,52 @@ https://www.whitebyte.info/programming/css/how-to-make-a-div-take-the-remaining-
     // 9. Create Leaflet Control Object for Legend
     var legend = L.control({
       position: 'topright'
+=======
+    // 5. Takes in the wacountydata.geojson to attribute information onto counties,
+    // and build circles to represent the number of cell towers in each Washington
+    // county.
+    Promise.all([
+      d3.json("assets/WildfireStart.geojson")
+    ]).then(function(datasets) {
+
+      // Stores county boundary information provided from the geojson file and
+      // create settings for display onto the map
+      counties = new L.geoJSON(datasets[0], {
+        style: function(feature) {
+          return {
+            stroke: true,
+            weight: 2,
+            fillOpacity: 0.1,
+            opacity: 0.2,
+            color: 'gray'
+          };
+        },
+        // For each circle, center each onto the center of the county, create a proportional size
+        // for the radius of each circle, and set each circle's color accordingly
+        onEachFeature: function(feature, layer) {
+          var circle = L.circle(Object.values(L.polygon(feature.geometry.coordinates).getBounds().getCenter()).reverse(), {
+            radius: 900 * Math.pow(feature.properties.CTNUM, 1),
+            stroke: true,
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.9,
+            color: 'white',
+            fillColor: setColor(feature.properties.CTNUM)
+          });
+          // Add all circles to the circle feature variable and a pop-up when the mouse hovers onto a specific circle.
+          // Uses the tooltip function provided by d3.js.
+          circle.addTo(circles);
+          circle.bindTooltip("# of Cell Towers in " + feature.properties.NAME + ": " + feature.properties.CTNUM, {
+            sticky: true
+          });
+        }
+      });
+
+      // 6. Adds circles and county information onto map.
+      circles.addTo(mymap);
+      counties.addTo(mymap);
+      counties.bringToBack();
+>>>>>>> 2d4f4fae17106cc3e0070f49246d0e64ef28c716
     });
 
     // 10. Function that runs when legend is added to map
